@@ -1,20 +1,20 @@
-package circuit
+package qsim
 
 import (
-	"../braket"
 	"fmt"
+	"math"
 )
 
 type Circuit struct {
 	N       int        // number of qubits
 	Diagram [][]string // Gates on circuit
-	Unitary []braket.Mat
+	Unitary []Mat
 }
 
 func NewCircuit(n int) *Circuit {
 	c := Circuit{
 		N:       n,
-		Unitary: []braket.Mat{},
+		Unitary: []Mat{},
 	}
 	c.Diagram = make([][]string, 2*n-1)
 	for i := 0; i < n; i++ {
@@ -24,15 +24,15 @@ func NewCircuit(n int) *Circuit {
 }
 
 func (c *Circuit) X(i int) {
-	m := braket.Identity(2)
+	m := Id(2)
 	for j := 0; j < c.N; j++ {
-		var n braket.Mat
+		var n Mat
 		if j == i {
-			n = braket.X()
+			n = X()
 		} else {
-			n = braket.Identity(2)
+			n = I()
 		}
-		m = braket.Tensor(n, m)
+		m = Tensor(n, m)
 	}
 	c.Unitary = append(c.Unitary, m)
 	c.Diagram[2*i] = append(c.Diagram[2*i], "X")
@@ -43,6 +43,51 @@ func (c *Circuit) H(i int) {
 }
 
 func (c *Circuit) CX(i, j int) {
+	// Add unitary gate
+	r := 1
+	for k := 0; k < c.N; k++ {
+		r *= 2
+	}
+	id := Id(r)
+	m1 := Id(2)
+	for k := 0; k < c.N; k++ {
+		var n Mat
+		if k == i {
+			n = Z()
+		} else {
+			n = I()
+		}
+		m1 = Tensor(m1, Mat(n))
+	}
+	m2 := Id(2)
+	for k := 0; k < c.N; k++ {
+		var n Mat
+		if k == j {
+			n = X()
+		} else {
+			n = I()
+		}
+		m2 = Tensor(m2, Mat(n))
+	}
+	m3 := Id(2)
+	for k := 0; k < c.N; k++ {
+		var n Mat
+		switch {
+		case k == i:
+			n = Z()
+		case k == j:
+			n = X()
+		default:
+			n = I()
+		}
+		m3 = Tensor(m3, Mat(n))
+	}
+	m3 = m3.Phase(math.Pi)
+
+	m := Add(id, m1, m2, m3)
+	c.Unitary = append(c.Unitary, m)
+
+	// Add diagram
 	if i == j || i >= c.N || j >= c.N {
 		panic("Invalid CNOT gate.")
 	}

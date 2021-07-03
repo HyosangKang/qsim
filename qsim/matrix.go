@@ -1,8 +1,21 @@
-package braket
+package qsim
+
+import (
+	"math"
+	"math/cmplx"
+)
 
 type Mat [][]complex128
 
-func Identity(n int) Mat {
+func NewMat(r, c int) Mat {
+	m := make([][]complex128, r)
+	for i := 0; i < r; i++ {
+		m[i] = make([]complex128, c)
+	}
+	return m
+}
+
+func Id(n int) Mat {
 	m := make([][]complex128, n)
 	for i := 0; i < n; i++ {
 		m[i] = make([]complex128, n)
@@ -11,12 +24,41 @@ func Identity(n int) Mat {
 	return m
 }
 
-func X() Mat {
-	m := make([][]complex128, 2)
-	for i := 0; i < 2; i++ {
-		m[i] = make([]complex128, 2)
+func (m Mat) Duplicate() Mat {
+	n := make([][]complex128, len(m))
+	for i := 0; i < len(m); i++ {
+		n[i] = make([]complex128, len(m[0]))
+		for j := 0; j < len(m[0]); j++ {
+			n[i][j] = m[i][j]
+		}
 	}
-	m[0][1], m[1][0] = 1, 1
+	return n
+}
+
+func (m Mat) Phase(t float64) Mat {
+	n := m.Duplicate()
+	for i := 0; i < len(n); i++ {
+		for j := 0; j < len(n[0]); j++ {
+			n[i][j] *= cmplx.Rect(1, t)
+		}
+	}
+	return n
+}
+
+func Add(ms ...Mat) Mat {
+	m := ms[0].Duplicate()
+	for i := 1; i < len(ms); i++ {
+		for j := 0; j < len(m); j++ {
+			for k := 0; k < len(m[0]); k++ {
+				m[j][k] += ms[i][j][k]
+			}
+		}
+	}
+	for j := 0; j < len(m); j++ {
+		for k := 0; k < len(m[0]); k++ {
+			m[j][k] /= complex(math.Sqrt(float64(len(ms))), 0)
+		}
+	}
 	return m
 }
 
