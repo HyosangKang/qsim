@@ -3,6 +3,7 @@ package qsim
 import (
 	"fmt"
 	"math"
+	"math/cmplx"
 )
 
 type Circuit struct {
@@ -24,17 +25,9 @@ func NewCircuit(n int) *Circuit {
 }
 
 func (c *Circuit) X(i int) {
-	m := Id(2)
-	for j := 0; j < c.N; j++ {
-		var n Mat
-		if j == i {
-			n = X()
-		} else {
-			n = I()
-		}
-		m = Tensor(n, m)
-	}
-	c.Unitary = append(c.Unitary, m)
+	m := InitOp(c.N)
+	m[i] = X()
+	c.Unitary = append(c.Unitary, TensorMat(m))
 	c.Diagram[2*i] = append(c.Diagram[2*i], "X")
 }
 
@@ -85,6 +78,7 @@ func (c *Circuit) CX(i, j int) {
 	m3 = m3.Phase(math.Pi)
 
 	m := Add(id, m1, m2, m3)
+	m = m.Factor(complex(float64(1)/float64(2), 0))
 	c.Unitary = append(c.Unitary, m)
 
 	// Add diagram
@@ -118,6 +112,33 @@ func (c *Circuit) CX(i, j int) {
 		}
 		c.Diagram[k] = append(c.Diagram[k], "|")
 	}
+}
+
+func (c *Circuit) StateVector() Mat {
+	k := TensorMat(InitKet(c.N))
+	for _, u := range c.Unitary {
+		k = Mul(u, k)
+	}
+	return k
+}
+
+func (c *Circuit) ShowState() {
+	m := c.StateVector()
+	s := ""
+	first := true
+	for i := 0; i < len(m); i++ {
+		if cmplx.Abs(m[i][0]) < 1e-10 {
+			continue
+		}
+		b := Binary(i, c.N)
+		if !first {
+			s += "+"
+		}
+		s += fmt.Sprintf("%.3f", m[i][0])
+		s += "|" + b + ">"
+		first = false
+	}
+	fmt.Println(s)
 }
 
 func (c *Circuit) Show() {

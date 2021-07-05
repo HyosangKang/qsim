@@ -17,6 +17,14 @@ func NewKet(i int) Mat {
 	return m
 }
 
+func InitKet(n int) []Mat {
+	ks := make([]Mat, n)
+	for i := 0; i < n; i++ {
+		ks[i] = NewKet(0)
+	}
+	return ks
+}
+
 func NewBra(i int) Mat {
 	m := NewMat(1, 2)
 	switch {
@@ -39,27 +47,35 @@ func NewOp(k, b Mat) Mat {
 	return Mul(k, b)
 }
 
+func InitOp(n int) []Mat {
+	op := make([]Mat, n)
+	for i := 0; i < n; i++ {
+		op[i] = I()
+	}
+	return op
+}
+
 func X() Mat {
-	m := NewOp(NewKet(0), NewBra(1))
-	n := NewOp(NewKet(1), NewBra(0))
-	return Add(m, n)
+	m := NewMat(2, 2)
+	m[0][1], m[1][0] = 1, 1
+	return m
 }
 
 func I() Mat {
-	m := NewOp(NewKet(0), NewBra(0))
-	n := NewOp(NewKet(1), NewBra(1))
-	return Add(m, n)
+	m := NewMat(2, 2)
+	m[0][0], m[1][1] = 1, 1
+	return m
 }
 
 func Z() Mat {
-	m := NewOp(NewKet(0), NewBra(0))
-	n := NewOp(NewKet(1).Phase(math.Pi), NewBra(1))
-	return Add(m, n)
+	m := I()
+	m[1][1] = -1
+	return m
 }
 
 func H() Mat {
-	k0, k1 := NewKet(0), NewKet(1)
-	m := NewOp(Add(k0, k1), NewBra(0))
-	n := NewOp(Add(k0, k1.Phase(math.Pi)), NewBra(1))
-	return Add(m, n)
+	m := NewMat(2, 2)
+	m[0][0], m[1][0] = complex(1/math.Sqrt(2), 0), complex(1/math.Sqrt(2), 0)
+	m[0][1], m[1][1] = complex(1/math.Sqrt(2), 0), complex(-1/math.Sqrt(2), 0)
+	return m
 }

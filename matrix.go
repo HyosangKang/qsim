@@ -1,11 +1,18 @@
 package qsim
 
 import (
-	"math"
 	"math/cmplx"
 )
 
 type Mat [][]complex128
+
+func TensorMat(ms []Mat) Mat {
+	m := ms[0]
+	for i := 1; i < len(ms); i++ {
+		m = Tensor(ms[i], m)
+	}
+	return m
+}
 
 func NewMat(r, c int) Mat {
 	m := make([][]complex128, r)
@@ -45,6 +52,13 @@ func (m Mat) Phase(t float64) Mat {
 	return n
 }
 
+func (m Mat) Factor(c complex128) Mat {
+	n := make([][]complex128, 1)
+	n[0] = make([]complex128, 1)
+	n[0][0] = c
+	return Tensor(n, m)
+}
+
 func Add(ms ...Mat) Mat {
 	m := ms[0].Duplicate()
 	for i := 1; i < len(ms); i++ {
@@ -52,11 +66,6 @@ func Add(ms ...Mat) Mat {
 			for k := 0; k < len(m[0]); k++ {
 				m[j][k] += ms[i][j][k]
 			}
-		}
-	}
-	for j := 0; j < len(m); j++ {
-		for k := 0; k < len(m[0]); k++ {
-			m[j][k] /= complex(math.Sqrt(float64(len(ms))), 0)
 		}
 	}
 	return m
