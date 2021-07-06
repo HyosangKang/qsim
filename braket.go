@@ -1,81 +1,49 @@
 package qsim
 
-import (
-	"math"
-)
+import "github.com/hyosangkang/qsim/matrix"
 
-func NewKet(i int) Mat {
-	m := NewMat(2, 1)
-	switch {
-	case i == 0:
-		m[0][0] = 1
-	case i == 1:
-		m[1][0] = 1
-	default:
-		panic("Invalid Ket")
+type Ket [][]complex128
+
+func NewKet(n int) Ket {
+	m := make([][]complex128, n)
+	for i := 0; i < n; i++ {
+		m[i] = make([]complex128, 2)
+		m[i][0] = 1
 	}
 	return m
 }
 
-func InitKet(n int) []Mat {
-	ks := make([]Mat, n)
-	for i := 0; i < n; i++ {
-		ks[i] = NewKet(0)
+func (k Ket) Matrix() matrix.Mat {
+	if len(k) == 0 {
+		panic("Invalid ket")
 	}
-	return ks
-}
-
-func NewBra(i int) Mat {
-	m := NewMat(1, 2)
-	switch {
-	case i == 0:
-		m[0][0] = 1
-	case i == 1:
-		m[0][1] = 1
-	default:
-		panic("Invalid Bra")
+	m := matrix.NewMat(2, 1)
+	m[0][0], m[1][0] = k[0][0], k[0][1]
+	for i := 1; i < len(k); i++ {
+		n := matrix.NewMat(2, 1)
+		n[0][0], n[1][0] = k[0][0], k[0][1]
+		m = matrix.Tensor(n, m)
 	}
 	return m
 }
 
-func NewOp(k, b Mat) Mat {
-	r := len(k[0])
-	c := len(b)
-	if r != c {
-		panic("Invalid Operation from Ket-Bra")
-	}
-	return Mul(k, b)
-}
+type Op []matrix.Mat
 
-func InitOp(n int) []Mat {
-	op := make([]Mat, n)
+func NewOp(n int) Op {
+	op := make([]matrix.Mat, n)
 	for i := 0; i < n; i++ {
-		op[i] = I()
+		op[i] = matrix.Id(2)
 	}
 	return op
 }
 
-func X() Mat {
-	m := NewMat(2, 2)
-	m[0][1], m[1][0] = 1, 1
-	return m
-}
-
-func I() Mat {
-	m := NewMat(2, 2)
-	m[0][0], m[1][1] = 1, 1
-	return m
-}
-
-func Z() Mat {
-	m := I()
-	m[1][1] = -1
-	return m
-}
-
-func H() Mat {
-	m := NewMat(2, 2)
-	m[0][0], m[1][0] = complex(1/math.Sqrt(2), 0), complex(1/math.Sqrt(2), 0)
-	m[0][1], m[1][1] = complex(1/math.Sqrt(2), 0), complex(-1/math.Sqrt(2), 0)
+func (o Op) Matrix() matrix.Mat {
+	if len(o) == 0 {
+		panic("Invalid operation")
+	}
+	m := o[0]
+	for i := 1; i < len(o); i++ {
+		m = matrix.Tensor(o[i], m)
+	}
 	return m
 }

@@ -1,4 +1,4 @@
-package qsim
+package util
 
 import "strconv"
 

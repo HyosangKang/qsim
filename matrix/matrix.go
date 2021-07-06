@@ -1,6 +1,7 @@
-package qsim
+package matrix
 
 import (
+	"math"
 	"math/cmplx"
 )
 
@@ -28,6 +29,25 @@ func Id(n int) Mat {
 		m[i] = make([]complex128, n)
 		m[i][i] = 1
 	}
+	return m
+}
+
+func X() Mat {
+	m := NewMat(2, 2)
+	m[0][1], m[1][0] = 1, 1
+	return m
+}
+
+func Z() Mat {
+	m := Id(2)
+	m[1][1] = -1
+	return m
+}
+
+func H() Mat {
+	m := NewMat(2, 2)
+	m[0][0], m[1][0] = complex(math.Sqrt(.5), 0), complex(math.Sqrt(.5), 0)
+	m[0][1], m[1][1] = complex(math.Sqrt(.5), 0), complex(math.Sqrt(-.5), 0)
 	return m
 }
 
