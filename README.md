@@ -11,14 +11,14 @@ c := qsim.NewCircuit(3)
 c.CX(0, 2)
 c.X(1)
 c.Show()
-c.ShowState()
 ```
 - Result
 ```
-[0]-o---
-    |
-[1]---X-
-    |
-[2]-X---
-(1.000+0.000i)|010>
+StateVector: (1.000+0.000i)|010>
+
+Diagram: [0]-o---
+             |
+         [1]---X-
+             |
+         [2]-X---
 ```
