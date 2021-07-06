@@ -47,7 +47,7 @@ func Z() Mat {
 func H() Mat {
 	m := NewMat(2, 2)
 	m[0][0], m[1][0] = complex(math.Sqrt(.5), 0), complex(math.Sqrt(.5), 0)
-	m[0][1], m[1][1] = complex(math.Sqrt(.5), 0), complex(math.Sqrt(-.5), 0)
+	m[0][1], m[1][1] = complex(math.Sqrt(.5), 0), complex(-math.Sqrt(.5), 0)
 	return m
 }
 

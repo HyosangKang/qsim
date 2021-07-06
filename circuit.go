@@ -34,7 +34,11 @@ func (c *Circuit) X(i int) {
 }
 
 func (c *Circuit) H(i int) {
-	c.Diagram[i] = append(c.Diagram[i], "H")
+	o := NewOp(c.N)
+	o[i] = matrix.H()
+	fmt.Println(matrix.H())
+	c.State = matrix.Mul(o.Matrix(), c.State)
+	c.Diagram[2*i] = append(c.Diagram[2*i], "H")
 }
 
 func (c *Circuit) CX(i, j int) {
